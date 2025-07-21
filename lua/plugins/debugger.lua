@@ -34,8 +34,7 @@ return {
                 type = 'unity',
                 request = 'attach',
                 name = 'Unity Editor',
-                path = vim.fn.getcwd() .. "/Library/EditorInstance.json",
-                endpoint = "127.0.0.1:56321"
+                path = "Library/EditorInstance.json",
             }
         }
 
