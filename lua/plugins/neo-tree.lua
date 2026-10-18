@@ -7,9 +7,8 @@ return {
 	"MunifTanjim/nui.nvim",
     },
     lazy = false,
-    opts = {
+    keys = {
+	{ "<C-m>", "<cmd>Neotree reveal left<cr>" }
     },
-    config = function()
-	vim.keymap.set('n', '<C-m>', ':Neotree reveal left<CR>', {})
-    end
+    opts = {}
 }
