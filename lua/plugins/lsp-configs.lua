@@ -1,35 +1,34 @@
 return {
     {
-        "williamboman/mason.nvim",
+        "mason-org/mason-lspconfig.nvim",
+        dependencies = {
+            { "mason-org/mason.nvim", opts = {} },
+            "neovim/nvim-lspconfig",
+        },
         config = function()
-            require('mason').setup()
-        end
-    },
-    {
-        "williamboman/mason-lspconfig.nvim",
-        config = function()
-            require('mason-lspconfig').setup({
+            -- csharpls-extended needs the metadata-uris feature to open decompiled
+            -- sources. csharp-ls looks for the .sln/.slnx from its cwd, so start it
+            -- in the root directory like nvim-lspconfig's default cmd does.
+            vim.lsp.config("csharp_ls", {
+                cmd = function(dispatchers, config)
+                    return vim.lsp.rpc.start({ "csharp-ls", "--features", "metadata-uris" }, dispatchers, {
+                        cwd = config.cmd_cwd or config.root_dir,
+                        env = config.cmd_env,
+                        detached = config.detached,
+                    })
+                end,
+            })
+
+            vim.api.nvim_create_autocmd("LspAttach", {
+                callback = function(args)
+                    vim.keymap.set("n", "<leader>ren", vim.lsp.buf.rename, { buffer = args.buf })
+                end
+            })
+
+            -- Installs these servers and enables every server installed through Mason.
+            require("mason-lspconfig").setup({
                 ensure_installed = { "lua_ls", "csharp_ls", "bashls" }
             })
-        end
-    },
-    {
-        "neovim/nvim-lspconfig",
-        config = function()
-            local lspconfig = require("lspconfig")
-            lspconfig.lua_ls.setup{}
-            lspconfig.bashls.setup {
-                cmd = { 'bash-language-server', 'start' },
-                filetypes = { 'bash', 'sh' }
-            }
-            lspconfig.csharp_ls.setup{
-                cmd = { "csharp-ls" },
-                filetypes = { "cs" },
-                init_options = { AutomaticWorkspaceInit = true },
-                on_attach = function()
-                    vim.keymap.set("n", "<leader>ren", vim.lsp.buf.rename, {})
-                end
-            }
         end
     },
     {

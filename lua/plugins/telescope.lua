@@ -1,6 +1,6 @@
 return {
     {
-	'nvim-telescope/telescope.nvim', tag = '0.1.8',
+	'nvim-telescope/telescope.nvim', version = '*',
 	dependencies = {
 	    'nvim-lua/plenary.nvim',
 	    "jonarrien/telescope-cmdline.nvim",
@@ -29,7 +29,9 @@ return {
     },
     {
 	"Decodetalkers/csharpls-extended-lsp.nvim",
+	-- csharp-ls must run with --features metadata-uris for this; see lsp-configs.lua.
 	config = function()
+	    require("csharpls_extended").buf_read_cmd_bind()
 	    local csharpls = require("telescope").load_extension("csharpls_definition")
 	    vim.keymap.set("n", "<leader>def", csharpls.csharpls_definition, {})
 	end

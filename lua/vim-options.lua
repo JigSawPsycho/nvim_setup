@@ -1,9 +1,11 @@
 vim.g.mapleader = " "
-vim.cmd("set shiftwidth=4")
-vim.cmd("set tabstop=4")
-vim.cmd("set expandtab")
-vim.cmd("set clipboard+=unnamedplus")
-vim.cmd("set relativenumber")
-vim.fn.setenv("NVIM_LISTEN_ADDRESS", "/tmp/nvimsocket")
+vim.g.maplocalleader = "\\"
+
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.expandtab = true
+vim.opt.clipboard:append("unnamedplus")
+vim.opt.relativenumber = true
+vim.env.NVIM_LISTEN_ADDRESS = "/tmp/nvimsocket"
 
 vim.keymap.set("i", "<C-w>", "<Esc>")
