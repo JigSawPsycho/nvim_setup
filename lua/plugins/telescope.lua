@@ -7,15 +7,16 @@ return {
 	},
 	config = function()
 	    local builtin = require("telescope.builtin")
-	    vim.keymap.set("n", "<leader>ref", builtin.lsp_references, {})
-	    vim.keymap.set("n", "<leader>inc", builtin.lsp_incoming_calls, {})
-	    vim.keymap.set("n", "<leader>out", builtin.lsp_outgoing_calls, {})
-	    vim.keymap.set("n", "<leader>imp", builtin.lsp_implementations, {})
-	    vim.keymap.set("n", "<leader>typ", builtin.lsp_type_definitions, {})
-	    vim.keymap.set("n", "<leader>old", builtin.oldfiles, {})
-	    vim.keymap.set('n', '<C-p>', builtin.find_files, {})
-	    vim.keymap.set('n', '<C-f>', builtin.live_grep, {})
-	    vim.keymap.set('n', '<leader><leader>', ':Telescope cmdline<CR>')
+	    vim.keymap.set("n", "<leader>ref", builtin.lsp_references, { desc = "References" })
+	    vim.keymap.set("n", "<leader>inc", builtin.lsp_incoming_calls, { desc = "Incoming calls" })
+	    vim.keymap.set("n", "<leader>out", builtin.lsp_outgoing_calls, { desc = "Outgoing calls" })
+	    vim.keymap.set("n", "<leader>imp", builtin.lsp_implementations, { desc = "Implementations" })
+	    vim.keymap.set("n", "<leader>typ", builtin.lsp_type_definitions, { desc = "Type definitions" })
+	    vim.keymap.set("n", "<leader>def", builtin.lsp_definitions, { desc = "Definitions" })
+	    vim.keymap.set("n", "<leader>old", builtin.oldfiles, { desc = "Recent files" })
+	    vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = "Find files" })
+	    vim.keymap.set('n', '<C-f>', builtin.live_grep, { desc = "Search in files" })
+	    vim.keymap.set('n', '<leader><leader>', ':Telescope cmdline<CR>', { desc = "Command line" })
 	    --    vim.keymap.set('n', '<C-d>', function()
 	    --	builtin.lsp_definitions({jump_type = "split"})
 	    --end)
@@ -25,15 +26,6 @@ return {
 	"nvim-telescope/telescope-ui-select.nvim",
 	config = function()
 	    require("telescope").load_extension("ui-select")
-	end
-    },
-    {
-	"Decodetalkers/csharpls-extended-lsp.nvim",
-	-- csharp-ls must run with --features metadata-uris for this; see lsp-configs.lua.
-	config = function()
-	    require("csharpls_extended").buf_read_cmd_bind()
-	    local csharpls = require("telescope").load_extension("csharpls_definition")
-	    vim.keymap.set("n", "<leader>def", csharpls.csharpls_definition, {})
 	end
     },
     {

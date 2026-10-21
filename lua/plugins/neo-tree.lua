@@ -8,7 +8,7 @@ return {
     },
     lazy = false,
     keys = {
-	{ "<C-m>", "<cmd>Neotree reveal left<cr>" }
+	{ "<C-m>", "<cmd>Neotree reveal left<cr>", desc = "Reveal file in tree" }
     },
     opts = {}
 }

@@ -2,34 +2,53 @@ return {
     {
         "mason-org/mason-lspconfig.nvim",
         dependencies = {
-            { "mason-org/mason.nvim", opts = {} },
+            {
+                "mason-org/mason.nvim",
+                opts = {
+                    -- The extra registry ships the same Roslyn build as VS Code's C#
+                    -- extension. The nuget one in the main registry is too old for roslyn.nvim.
+                    registries = {
+                        "github:mason-org/mason-registry",
+                        "github:Crashdummyy/mason-registry",
+                    },
+                },
+            },
             "neovim/nvim-lspconfig",
         },
         config = function()
-            -- csharpls-extended needs the metadata-uris feature to open decompiled
-            -- sources. csharp-ls looks for the .sln/.slnx from its cwd, so start it
-            -- in the root directory like nvim-lspconfig's default cmd does.
-            vim.lsp.config("csharp_ls", {
-                cmd = function(dispatchers, config)
-                    return vim.lsp.rpc.start({ "csharp-ls", "--features", "metadata-uris" }, dispatchers, {
-                        cwd = config.cmd_cwd or config.root_dir,
-                        env = config.cmd_env,
-                        detached = config.detached,
-                    })
-                end,
-            })
-
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(args)
-                    vim.keymap.set("n", "<leader>ren", vim.lsp.buf.rename, { buffer = args.buf })
+                    vim.keymap.set("n", "<leader>ren", vim.lsp.buf.rename, { buffer = args.buf, desc = "Rename symbol" })
                 end
             })
 
             -- Installs these servers and enables every server installed through Mason.
             require("mason-lspconfig").setup({
-                ensure_installed = { "lua_ls", "csharp_ls", "bashls" }
+                ensure_installed = { "lua_ls", "bashls" },
+                -- roslyn.nvim handles C#. Skip other C# servers in case one is installed through Mason.
+                automatic_enable = { exclude = { "csharp_ls", "roslyn_ls" } },
             })
+
+            -- mason-lspconfig only installs servers nvim-lspconfig knows, so install
+            -- Roslyn for roslyn.nvim here. Skipped when headless, like ensure_installed,
+            -- so scripted runs don't exit partway through the download.
+            if #vim.api.nvim_list_uis() > 0 then
+                local registry = require("mason-registry")
+                registry.refresh(vim.schedule_wrap(function()
+                    local ok, roslyn = pcall(registry.get_package, "roslyn")
+                    if not ok then
+                        vim.notify("Mason package 'roslyn' not found; C# LSP is unavailable", vim.log.levels.WARN)
+                    elseif not roslyn:is_installed() and not roslyn:is_installing() then
+                        roslyn:install()
+                    end
+                end))
+            end
         end
+    },
+    {
+        -- Starts the Roslyn language server for C# files.
+        "seblyng/roslyn.nvim",
+        opts = {},
     },
     {
         "ray-x/lsp_signature.nvim",

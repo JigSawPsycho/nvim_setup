@@ -28,22 +28,7 @@ return {
             dapui.close()
         end
 
-        dap.adapters.unity = {
-            type = 'executable',
-            command = '/opt/mono/bin/mono',
-            args = {'/home/mikeevans/vscode-unity-debug/extension/bin/UnityDebug.exe'}
-        }
-
-        dap.configurations.cs = {
-            {
-                type = 'unity',
-                request = 'attach',
-                name = 'Unity Editor',
-                path = "Library/EditorInstance.json",
-            }
-        }
-
-        vim.keymap.set('n', '<Leader>dt', dap.toggle_breakpoint)
-        vim.keymap.set('n', '<Leader>dc', dap.continue)
+        vim.keymap.set('n', '<Leader>dt', dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
+        vim.keymap.set('n', '<Leader>dc', dap.continue, { desc = "Start / continue debugging" })
     end
 }
