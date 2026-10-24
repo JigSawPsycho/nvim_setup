@@ -10,5 +10,11 @@ return {
     keys = {
 	{ "<C-m>", "<cmd>Neotree reveal left<cr>", desc = "Reveal file in tree" }
     },
-    opts = {}
+    opts = {},
+    config = function(_, opts)
+        require("neo-tree").setup(opts)
+        local file_tree_layout = require("file_tree_layout")
+        file_tree_layout.keep_file_tree_at_far_left()
+        file_tree_layout.keep_sidebar_widths_when_file_tree_closes()
+    end,
 }
