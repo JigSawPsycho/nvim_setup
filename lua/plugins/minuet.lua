@@ -1,6 +1,6 @@
 -- AI completion from local models served by Ollama on localhost:11434. Nothing is sent
--- off this machine. Together the two models take about 14 GB, so on a 16 GB GPU both can
--- stay loaded and Ollama doesn't swap between them.
+-- off this machine. Together the two models take about 14 GB, so on a 16 GB GPU (like the
+-- one these were picked on) both can stay loaded and Ollama doesn't swap between them.
 local ollama_base_url = "http://localhost:11434/v1"
 -- Ghost text runs on every typing pause, so it uses the smaller model: about twice as fast
 -- as 14b with similar accuracy.
@@ -24,7 +24,8 @@ return {
     lazy = false,
     opts = {
         provider = "openai_fim_compatible",
-        -- One suggestion per pause and a small context keep a local model responsive.
+        -- One suggestion per pause and a small context (in characters) keep a local model
+        -- responsive.
         n_completions = 1,
         context_window = 2048,
         -- Ask after a short pause in typing. With the default 400ms, the wait before asking was
@@ -75,10 +76,12 @@ return {
         -- Next-edit prediction across the file. Experimental, so it only runs on request.
         duet = {
             provider = "openai_compatible",
-            -- Ollama loads models with a 4096-token context and silently cuts longer prompts.
-            -- The default 40000 characters of surrounding code would overflow that, so send
-            -- about 2000 tokens' worth and leave room for minuet's instructions.
-            non_editable_region = { context_window = 8000 },
+            -- Ollama loads models with a 4096-token context by default and silently cuts
+            -- anything longer. That limit has to hold minuet's instructions and examples, the
+            -- surrounding code, your recent edits and the model's reply, so the defaults
+            -- (40000 and 8000 characters) are cut down to fit.
+            non_editable_region = { context_window = 4000 },
+            recent_edits = { max_total_chars = 2000 },
             provider_options = {
                 openai_compatible = {
                     api_key = ollama_api_key,
