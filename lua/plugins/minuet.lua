@@ -1,22 +1,24 @@
 -- AI completion from local models served by Ollama on localhost:11434. Nothing is sent
--- off this machine. Together the two models take about 14 GB, so both stay loaded on a
--- 16 GB GPU and Ollama never has to swap them.
-local ollama_end_point = "http://localhost:11434/v1"
+-- off this machine. Together the two models take about 14 GB, so on a 16 GB GPU both can
+-- stay loaded and Ollama doesn't swap between them.
+local ollama_base_url = "http://localhost:11434/v1"
 -- Ghost text runs on every typing pause, so it uses the smaller model: about twice as fast
 -- as 14b with similar accuracy.
 local ghost_text_model = "qwen2.5-coder:7b"
 -- Next-edit prediction only runs on request, so it can afford the bigger model.
 local next_edit_model = "qwen2.5-coder:14b"
 
--- Ollama ignores the key, but minuet refuses to send a request without one.
+-- Ollama ignores the key, but minuet refuses to send a request without one. It has to be a
+-- function: minuet treats a plain string as the name of an environment variable.
 local function ollama_api_key()
     return "ollama"
 end
 
 return {
     "milanglacier/minuet-ai.nvim",
-    -- Without Ollama every typing pause would show a failed-request error, so skip
-    -- machines that don't have it.
+    -- Without Ollama every typing pause would show a failed-request error, so skip machines
+    -- that don't have it installed. The server still needs to be running, with the models above
+    -- pulled.
     cond = vim.fn.executable("ollama") == 1,
     -- Ghost text turns on per buffer when its filetype is set, so load before any file opens.
     lazy = false,
@@ -25,8 +27,8 @@ return {
         -- One suggestion per pause and a small context keep a local model responsive.
         n_completions = 1,
         context_window = 2048,
-        -- Ask after a short pause in typing. The default 400ms wait is longer than the model
-        -- takes to answer.
+        -- Ask after a short pause in typing. With the default 400ms, the wait before asking was
+        -- longer than the model takes to answer.
         debounce = 150,
         -- No minimum gap between requests. With one, a pause that comes too soon after the
         -- last request gets no suggestion at all, and minuet doesn't retry.
@@ -44,7 +46,7 @@ return {
                 api_key = ollama_api_key,
                 name = "Ollama",
                 -- Fill-in-the-middle endpoint: the model sees code before and after the cursor.
-                end_point = ollama_end_point .. "/completions",
+                end_point = ollama_base_url .. "/completions",
                 model = ghost_text_model,
                 optional = {
                     max_tokens = 56,
@@ -73,12 +75,16 @@ return {
         -- Next-edit prediction across the file. Experimental, so it only runs on request.
         duet = {
             provider = "openai_compatible",
+            -- Ollama loads models with a 4096-token context and silently cuts longer prompts.
+            -- The default 40000 characters of surrounding code would overflow that, so send
+            -- about 2000 tokens' worth and leave room for minuet's instructions.
+            non_editable_region = { context_window = 8000 },
             provider_options = {
                 openai_compatible = {
                     api_key = ollama_api_key,
                     name = "Ollama",
                     -- Duet sends a rewrite request, which needs the chat endpoint.
-                    end_point = ollama_end_point .. "/chat/completions",
+                    end_point = ollama_base_url .. "/chat/completions",
                     model = next_edit_model,
                 },
             },
